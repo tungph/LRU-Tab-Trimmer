@@ -1,10 +1,9 @@
 /*
   add "autoDiscardable" support to "chrome.tabs.query" and "chrome.tabs.update"
+  Firefox-specific implementation
 */
 
-const isFirefox = /Firefox/.test(navigator.userAgent) || typeof InstallTrigger !== 'undefined';
-
-if (isFirefox) {
+{
   const cache = {};
   const query = chrome.tabs.query;
   chrome.tabs.query = function(queryInfo, callback = () => {}) {
@@ -49,7 +48,7 @@ if (isFirefox) {
 }
 
 // FF onCreated is called when tab.url is still about:blank
-if (isFirefox) {
+{
   const pa = chrome.tabs.onCreated.addListener;
   chrome.tabs.onCreated.addListener = c => {
     c._ = tab => {

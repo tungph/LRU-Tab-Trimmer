@@ -1,17 +1,24 @@
-# Auto Tab Discard
-A browser extension which uses the native tab discarding method (`chrome.tabs.discard`) to automatically reduce memory usage of inactive tabs. This extension is more efficient and should be less buggy compared to the alternatives extensions that use DOM replacement method.
+# Auto Tab Discard for Firefox
 
-### Preview
+A Firefox extension that uses the native tab discarding method (`browser.tabs.discard`) to automatically reduce memory usage of inactive tabs. This extension is optimized specifically for Firefox and provides efficient tab management without DOM replacement.
 
-[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/S0rHU38OnTE/0.jpg)](https://www.youtube.com/watch?v=S0rHU38OnTE)
+## Features
 
-### Links
+- **Native Tab Discarding**: Uses Firefox's built-in tab discarding API for efficient memory management
+- **Smart Detection**: Prevents discarding tabs with unsaved forms, playing audio, or pinned tabs
+- **Visual Indicators**: Adds emoji (💤) to discarded tab titles and modifies favicons
+- **Flexible Configuration**: Customize discarding behavior based on tab count, idle time, or memory usage
+- **Whitelist Support**: Exclude specific domains from auto-discarding
+- **Keyboard Shortcuts**: Quick commands for manual tab management
 
-  * Homepage: https://webextension.org/listing/tab-discard.html
-  * Privacy Policy: https://webextension.org/privacy-policy/extension/tab-discard.html
-  * Chrome: https://chrome.google.com/webstore/detail/auto-tab-discard/jhnleheckmknfcgijgkadoemagpecfol
-  * Edge: https://microsoftedge.microsoft.com/addons/detail/auto-tab-discard/nfkkljlcjnkngcmdpcammanncbhkndfe
-  * Firefox: https://addons.mozilla.org/firefox/addon/auto-tab-discard/
-  * Opera: https://addons.opera.com/en/extensions/details/auto-tab-discard/
-  * Product Review: https://webextension.org/blog/2022/04/17/auto-tab-discard-extension.html
-  * Preview: https://www.youtube.com/watch?v=S0rHU38OnTE
+## Installation
+
+### From Source (Development)
+1. Clone this repository
+2. Open Firefox and navigate to `about:debugging`
+3. Click "This Firefox" on the left panel
+4. Click "Load Temporary Add-on"
+5. Select the `manifest.json` file from the cloned repository
+
+### From Firefox Add-ons Store
+Visit: https://addons.mozilla.org/firefox/addon/auto-tab-discard/

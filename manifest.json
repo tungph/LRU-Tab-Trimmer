@@ -1,8 +1,8 @@
 {
   "manifest_version": 2,
-  "version": "0.5.0",
+  "version": "1.0.0",
   "default_locale": "en",
-  "name": "Auto Tab Discard",
+  "name": "Auto Tab Discard for Firefox",
   "description": "__MSG_app_description__",
 
   "icons": {
@@ -72,10 +72,10 @@
   },
   "options_ui": {
     "page": "data/options/index.html",
-    "chrome_style": true,
+    "browser_style": true,
     "open_in_tab": true
   },
-  "homepage_url": "https://add0n.com/tab-discard.html",
+  "homepage_url": "https://github.com/tungph/LRU-Tab-Trimmer",
   "commands": {
     "discard-tab": {
       "description": "__MSG_cmd_discard_tab__"

@@ -1,15 +1,12 @@
-import {number} from './modes/number.mjs';
-import {storage, prefs} from './core/prefs.mjs';
-import {navigate} from './core/navigate.mjs';
-import {discard, inprogress} from './core/discard.mjs';
-import {query, notify, match} from './core/utils.mjs';
-import {starters} from './core/startup.mjs';
-import {interrupts} from './plugins/loader.mjs';
+/* globals discard, query, notify, navigate, starters, storage, prefs, number, interrupts, inprogress */
+'use strict';
 
 // Context Menu
 {
-  const onStartup = () => {
-    const contexts = ['action'];
+  const TST = 'treestyletab@piro.sakura.ne.jp';
+
+  const onStartup = async () => {
+    const contexts = ['browser_action'];
     if (chrome.contextMenus.ContextType.TAB && prefs['tab.context']) {
       contexts.push('tab');
     }
@@ -68,24 +65,16 @@ import {interrupts} from './plugins/loader.mjs';
       parentId: 'discard-sub-menu'
     },
     {
-      id: 'extra',
-      title: chrome.i18n.getMessage('menu_extra'),
-      contexts,
-      documentUrlPatterns: ['*://*/*']
-    },
-    {
       id: 'auto-discardable',
       title: chrome.i18n.getMessage('popup_allowed'),
       contexts,
-      documentUrlPatterns: ['*://*/*'],
-      parentId: 'extra'
+      documentUrlPatterns: ['*://*/*']
     },
     {
       id: 'whitelist-domain',
       title: chrome.i18n.getMessage('menu_whitelist_domain'),
       contexts,
-      documentUrlPatterns: ['*://*/*'],
-      parentId: 'extra'
+      documentUrlPatterns: ['*://*/*']
     },
     prefs['link.context'] ? {
       id: 'open-tab-then-discard',
@@ -97,6 +86,10 @@ import {interrupts} from './plugins/loader.mjs';
   starters.push(onStartup);
 
   const onClicked = async (info, tab) => {
+    if (tab && !tab.url) { // Tree Style Tab 3.0.12 and later don't deliver a real tab.
+      // eslint-disable-next-line require-atomic-updates
+      tab = await new Promise(resolve => chrome.tabs.get(tab.id, resolve));
+    }
     if (typeof interrupts !== 'undefined') {
       // wait for plug-in to be ready
       await interrupts['before-action']();
@@ -107,64 +100,28 @@ import {interrupts} from './plugins/loader.mjs';
       console.warn('plugins module is not loaded');
     }
     //
-    const {menuItemId, shiftKey, checked} = info;
-
-    if (menuItemId === 'whitelist-domain' || menuItemId === 'whitelist-session') {
-      storage(prefs).then(async prefs => {
-        Object.assign(prefs, await storage({
-          'whitelist.session': []
-        }, 'session'));
-
+    const {menuItemId, shiftKey} = info;
+    if (menuItemId === 'whitelist-domain' || menuItemId === 'whitelist-session' || menuItemId === 'whitelist-exact') {
+      storage(prefs).then(prefs => {
         const d = menuItemId !== 'whitelist-session';
-
         const {hostname, protocol = ''} = new URL(tab.url);
 
         let rule;
         if (protocol.startsWith('http') || protocol.startsWith('ftp')) {
           let whitelist = prefs[d ? 'whitelist' : 'whitelist.session'];
 
-          if (shiftKey) {
+          if (menuItemId === 'whitelist-exact') {
             rule = 're:^' + tab.url.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&') + '$';
           }
           else {
             rule = hostname;
           }
-
-          if (checked === false) {
-            whitelist = whitelist.filter(rule => {
-              const m = match([rule], hostname, tab.url);
-
-              if (m) {
-                // https://github.com/rNeomy/auto-tab-discard/issues/350
-                // notify(`"${rule}" ${chrome.i18n.getMessage(d ? 'menu_msg5' : 'menu_msg6')}`);
-                return false;
-              }
-              else {
-                return true;
-              }
-            });
-          }
-          else {
-            whitelist.push(rule);
-
-            // https://github.com/rNeomy/auto-tab-discard/issues/350
-            // notify(`"${rule}" ${chrome.i18n.getMessage(d ? 'menu_msg1' : 'menu_msg4')}`);
-          }
+          whitelist.push(rule);
           whitelist = whitelist.filter((h, i, l) => l.indexOf(h) === i);
-
-          const check = () => number.check([], {
-            'exclude-active': false,
-            'icon-update': true
-          }, 'menu/1');
-
-          if (d) {
-            chrome.storage.local.set({whitelist}, check);
-          }
-          else {
-            chrome.storage.session.set({
-              'whitelist.session': whitelist
-            }, check);
-          }
+          chrome.storage.local.set({
+            [d ? 'whitelist' : 'whitelist.session']: whitelist
+          });
+          notify(`"${rule}" ${chrome.i18n.getMessage(d ? 'menu_msg1' : 'menu_msg4')}`);
         }
         else {
           notify(`"${protocol}" ${chrome.i18n.getMessage('menu_msg2')}`);
@@ -176,39 +133,26 @@ import {interrupts} from './plugins/loader.mjs';
       const tabs = await query({
         windowId: tab.windowId
       });
-
       const htabs = []; // these are tabs that will be discarded
       // discard-tree for Tree Style Tab
-      if (menuItemId === 'discard-tree' && info.viewType === 'sidebar') {
-        htabs.push(tab);
-        await new Promise(resolve => chrome.runtime.sendMessage('treestyletab@piro.sakura.ne.jp', {
-          type: 'get-tree',
-          tab: tab.id
-        }, tab => {
-          const add = tab => {
-            htabs.push(...tab.children);
-            tab.children.filter(t => t.children).forEach(add);
-          };
-          add(tab);
-          resolve();
-        }));
-      }
-      // discard-tree for native
-      else if (tab.highlighted && menuItemId === 'discard-tree') { // if a single not-active tab is called
-        const tbs = tabs.filter(t => t.highlighted);
-        if (tbs.length > 1) {
-          htabs.push(...tbs);
-        }
-        else if (tab.groupId && tab.groupId > -1) {
-          htabs.push(...tabs.filter(t => t.groupId === tab.groupId));
-        }
-        else {
-          htabs.push(tab);
-        }
-      }
+    if (menuItemId === 'discard-tree' && info.viewType === 'sidebar') {
+      htabs.push(tab);
+      await new Promise(resolve => chrome.runtime.sendMessage(TST, {
+        type: 'get-tree',
+        tab: tab.id
+      }, tab => {
+        const add = tab => {
+          htabs.push(...tab.children);
+          tab.children.filter(t => t.children).forEach(add);
+        };
+        add(tab);
+        resolve();
+      }));
+    }
       else {
         htabs.push(tab);
       }
+
       if (htabs.filter(t => t.active).length) {
         // ids to be discarded
         const ids = htabs.map(t => t.id);
@@ -221,7 +165,6 @@ import {interrupts} from './plugins/loader.mjs';
           })
           .sort((a, b) => Math.abs(a.index - tab.index) - Math.abs(b.index - tab.index))
           .shift();
-
         if (otab) {
           chrome.tabs.update(otab.id, {
             active: true
@@ -240,30 +183,16 @@ import {interrupts} from './plugins/loader.mjs';
       }
     }
     else if (menuItemId === 'open-tab-then-discard') {
-      if (/Firefox/.test(navigator.userAgent)) {
-        chrome.tabs.create({
-          active: false,
-          url: info.linkUrl,
-          discarded: true
-        });
-      }
-      else {
-        chrome.tabs.create({
-          active: false,
-          url: info.linkUrl
-        }, tab => chrome.scripting.executeScript({
-          target: {tabId: tab.id},
-          func: () => window.stop()
-        }).then(() => chrome.scripting.executeScript({
-          target: {tabId: tab.id},
-          files: ['data/lazy.js']
-        })));
-      }
+      chrome.tabs.create({
+        active: false,
+        url: info.linkUrl,
+        discarded: true
+      });
     }
     else if (menuItemId === 'auto-discardable') {
       const autoDiscardable = info.value || false; // when called from page context menu, there is no value
-      chrome.tabs.update(tab.id, {
-        autoDiscardable
+      chrome.tabs.executeScript(tab.id, {
+        code: `allowed = ${autoDiscardable};`
       });
     }
     else if (menuItemId === 'toggle-allowed') {
@@ -289,7 +218,6 @@ import {interrupts} from './plugins/loader.mjs';
         info.currentWindow = false;
       }
       let tabs = await query(info);
-
       if (menuItemId.endsWith('rights') || menuItemId.endsWith('lefts')) {
         if (menuItemId.endsWith('lefts')) {
           tabs = tabs.filter(t => t.index < tab.index);
@@ -304,7 +232,7 @@ import {interrupts} from './plugins/loader.mjs';
         }
         else {
           // make sure to only discard possible tabs not all of them
-          number.check(tabs, number.IGNORE, 'menu/2');
+          number.check(tabs, number.IGNORE);
         }
       }
       // release
@@ -318,7 +246,7 @@ import {interrupts} from './plugins/loader.mjs';
     }
   };
   chrome.contextMenus.onClicked.addListener(onClicked);
-  chrome.action.onClicked.addListener(tab => onClicked({
+  chrome.browserAction.onClicked.addListener(tab => onClicked({
     menuItemId: localStorage.getItem('click')
   }, tab));
   // commands
@@ -348,7 +276,6 @@ import {interrupts} from './plugins/loader.mjs';
           onClicked({
             menuItemId: request.cmd,
             value: request.value,
-            checked: request.checked,
             shiftKey: request.shiftKey
           }, tabs[0]);
         }
@@ -361,13 +288,6 @@ import {interrupts} from './plugins/loader.mjs';
     }
     else if (request.method === 'build-context') {
       onStartup();
-    }
-    else if (request.method === 'run-check-on-action') {
-      const tabs = request.ids.map(id => ({id}));
-      number.check(tabs, {
-        'exclude-active': false,
-        'icon-update': true
-      }, 'menu/3');
     }
   });
 }

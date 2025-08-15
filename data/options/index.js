@@ -1,8 +1,5 @@
 'use strict';
 
-const isFirefox = /Firefox/.test(navigator.userAgent) || typeof InstallTrigger !== 'undefined';
-const isEdge = /Edg\//.test(navigator.userAgent);
-
 // localization
 [...document.querySelectorAll('[data-i18n]')].forEach(e => {
   e[e.dataset.i18nValue || 'textContent'] = chrome.i18n.getMessage(e.dataset.i18n);
@@ -58,7 +55,7 @@ const restore = () => storage({
   'go-hidden': false,
   'memory-enabled': false,
   'memory-value': 60,
-  'favicon-delay': isFirefox ? 500 : 100,
+  'favicon-delay': 500,
   'simultaneous-jobs': 10,
   'idle': false,
   'idle-timeout': 5 * 60,
@@ -236,14 +233,12 @@ const onChanged = prefs => {
   const tab = prefs['tab.context'];
   const page = prefs['page.context'];
   const link = prefs['link.context'];
-  if (tab || page || link) { // Firefox
-    if ((tab && (tab.newValue !== tab.oldValue)) ||
-      (page && (page.newValue !== page.oldValue)) ||
-      (link && (link.newValue !== link.oldValue))) {
-      chrome.runtime.sendMessage({
-        method: 'build-context'
-      });
-    }
+  if ((tab && (tab.newValue !== tab.oldValue)) ||
+    (page && (page.newValue !== page.oldValue)) ||
+    (link && (link.newValue !== link.oldValue))) {
+    chrome.runtime.sendMessage({
+      method: 'build-context'
+    });
   }
 };
 chrome.storage.onChanged.addListener(onChanged);
@@ -262,12 +257,7 @@ document.getElementById('reset').addEventListener('click', e => {
   }
 });
 // rate
-if (isFirefox) {
-  document.getElementById('rate').href = 'https://addons.mozilla.org/firefox/addon/auto-tab-discard/reviews/';
-}
-else if (isEdge) {
-  document.getElementById('rate').href = 'https://microsoftedge.microsoft.com/addons/detail/nfkkljlcjnkngcmdpcammanncbhkndfe';
-}
+document.getElementById('rate').href = 'https://addons.mozilla.org/firefox/addon/auto-tab-discard/reviews/';
 // export
 document.getElementById('export').addEventListener('click', () => {
   chrome.storage.local.get(null, prefs => {

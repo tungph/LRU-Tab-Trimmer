@@ -1,4 +1,4 @@
-/* globals hidden, isFirefox */
+/* globals hidden */
 'use strict';
 
 const prefs = {
@@ -13,7 +13,7 @@ const prefs = {
   'link.context': true,
   'whitelist': [], // whitelist hostnames and regexp rules
   'whitelist.session': [], // clear on restart
-  'favicon-delay': isFirefox ? 500 : 100,
+  'favicon-delay': 500,
   'log': false,
   'simultaneous-jobs': 10,
   'idle-timeout': 5 * 60, // in seconds
@@ -61,7 +61,7 @@ chrome.storage.onChanged.addListener(ps => {
   Object.keys(ps).forEach(k => {
     prefs[k] = ps[k].newValue;
   });
-  if (isFirefox && ps['go-hidden']) {
+  if (ps['go-hidden']) {
     hidden.install();
   }
   if (ps.click) {
@@ -242,12 +242,7 @@ discard.tabs = [];
 discard.count = 0;
 discard.perform = tab => {
   try {
-    if (isFirefox) {
-      chrome.tabs.discard(tab.id);
-    }
-    else {
-      chrome.tabs.discard(tab.id, () => chrome.runtime.lastError);
-    }
+    chrome.tabs.discard(tab.id);
   }
   catch (e) {
     log('discarding failed', e);
@@ -336,10 +331,8 @@ const popup = () => chrome.browserAction.setPopup({
 starters.push(popup);
 
 // start-up
-if (isFirefox) {
-  // deal with hidden tabs
-  hidden.install();
-}
+// deal with hidden tabs
+hidden.install();
 
 /* FAQs & Feedback */
 {
