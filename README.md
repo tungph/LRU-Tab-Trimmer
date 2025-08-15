@@ -1,6 +1,6 @@
-# Auto Tab Discard for Firefox
+# LRU Tab Trimmer
 
-A Firefox extension that uses the native tab discarding method (`browser.tabs.discard`) to automatically reduce memory usage of inactive tabs. This extension is optimized specifically for Firefox and provides efficient tab management without DOM replacement.
+A Firefox extension that uses the native tab discarding method (`browser.tabs.discard`) to automatically reduce memory usage of inactive tabs using an LRU (Least Recently Used) strategy. This extension is optimized specifically for Firefox and provides efficient tab management without DOM replacement.
 
 ## Features
 
@@ -21,4 +21,4 @@ A Firefox extension that uses the native tab discarding method (`browser.tabs.di
 5. Select the `manifest.json` file from the cloned repository
 
 ### From Firefox Add-ons Store
-Visit: https://addons.mozilla.org/firefox/addon/auto-tab-discard/
+Visit: https://addons.mozilla.org/firefox/addon/lru-tab-trimmer/

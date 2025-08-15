@@ -4,7 +4,7 @@ This file provides guidance to WARP (warp.dev) when working with code in this re
 
 ## Project Overview
 
-Auto Tab Discard for Firefox is a browser extension that automatically reduces memory usage of inactive tabs using Firefox's native `browser.tabs.discard` API. This extension is optimized specifically for Firefox using Manifest V2.
+LRU Tab Trimmer is a browser extension that automatically reduces memory usage of inactive tabs using Firefox's native `browser.tabs.discard` API with an LRU (Least Recently Used) strategy. This extension is optimized specifically for Firefox using Manifest V2.
 
 ## Project Structure
 
@@ -69,6 +69,28 @@ background.js (main entry)
 - `browser.notifications`: User notifications
 
 ## Common Development Commands
+
+### Quick Start with Makefile
+
+```bash
+# Install development tools (web-ext)
+make install-tools
+
+# Run extension in Firefox with auto-reload (development mode)
+make dev
+
+# Build and package the extension
+make package
+
+# Run linting and validation
+make lint
+
+# Check your development environment
+make doctor
+
+# View all available commands
+make help
+```
 
 ### Loading the Extension
 

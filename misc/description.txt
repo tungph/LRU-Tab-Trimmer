@@ -1,4 +1,4 @@
-"Auto Tab Discard" is a lightweight browser extension that automatically reduces the amount of memory used by open but inactive tabs, helping to conserve battery life on portable devices by disabling JavaScript code and DOM events on discarded tabs.
+"LRU Tab Trimmer" is a lightweight browser extension that automatically reduces the amount of memory used by open but inactive tabs using an LRU (Least Recently Used) strategy, helping to conserve battery life on portable devices by disabling JavaScript code and DOM events on discarded tabs.
 
 Preview:
 
@@ -9,7 +9,7 @@ Instruction:
 There are two options on the extension's interface to either discard tabs or release discarding (the "x" buttons)
 
 
-The features of "Auto Tab Discard" are:
+The features of "LRU Tab Trimmer" are:
 
   * Improves browser performance and reduces memory usage by automatically or manually discarding inactive, idle, or forgotten tabs.
   * Includes a list of hostnames or regular expressions that can be excluded from auto-discarding.
@@ -26,7 +26,7 @@ The options for configuring whether tabs should be discarded or not include:
   * The presence of a power source
   * Unsaved content or user input in a tab
 
-The available plugins for "Auto Tab Discard" are:
+The available plugins for "LRU Tab Trimmer" are:
 
   * Release the discarded state of the next or previous tab.
   * Release the discarded state of all tabs in the active window.

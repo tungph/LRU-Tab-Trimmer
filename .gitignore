@@ -1,0 +1,38 @@
+# Build directories
+build/
+dist/
+web-ext-artifacts/
+
+# Package files
+*.xpi
+*.zip
+
+# Development profiles
+firefox-profile/
+
+# Node modules (if using npm/web-ext)
+node_modules/
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.bak
+
+# Environment files
+.env
+.env.local
