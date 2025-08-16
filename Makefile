@@ -1,8 +1,8 @@
-# Makefile for Auto Tab Discard Firefox Extension
+# Makefile for LRU Tab Trimmer Firefox Extension
 # Usage: make [target]
 
 # Variables
-EXTENSION_NAME = auto-tab-discard
+EXTENSION_NAME = lru-tab-trimmer
 VERSION = $(shell grep '"version"' manifest.json | cut -d '"' -f 4)
 BUILD_DIR = build
 DIST_DIR = dist
@@ -36,7 +36,7 @@ all: help
 
 # Help target
 help:
-	@echo "$(GREEN)Auto Tab Discard Firefox Extension - Makefile$(NC)"
+	@echo "$(GREEN)LRU Tab Trimmer Firefox Extension - Makefile$(NC)"
 	@echo ""
 	@echo "Available targets:"
 	@echo "  $(YELLOW)dev$(NC)        - Run extension in Firefox with auto-reload"
